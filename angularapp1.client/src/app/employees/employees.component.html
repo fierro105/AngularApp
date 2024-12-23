@@ -1,0 +1,24 @@
+<p>employees works!</p>
+
+<app-employees-modal></app-employees-modal>
+
+<div class="container">
+  <table id="table" datatable [dtOptions]="dtoptions" [dtTrigger]="dttrigger">
+    <thead>
+      <tr>
+        <th *ngFor="let column of dtoptions.columns">{{ column.title }}</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let employee of employees">
+        <td *ngFor="let column of columns">{{ employee[column] }}</td>
+        <td>
+          <button class="btn btn-primary btn-sm" type="button" (click)="getEmployeeById( employee )" data-bs-toggle="modal" data-bs-target="#exampleModal">Modify</button>
+          <button class="btn btn-danger btn-sm" type="button" (click)="deleteEmployee( employee )">Delete</button>
+        </td>
+
+      </tr>
+    </tbody>
+  </table>
+</div>
