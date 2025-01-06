@@ -5,7 +5,9 @@ import { Subject, Subscription } from 'rxjs';
 import { FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
 import { DataTableDirective } from 'angular-datatables';
 import { Employee } from '../models/employee.model';
-import { EmployeesService } from '../employees.service';
+import { EmployeesService } from '../services/employees.service';
+import { NgbModal, NgbModalConfig} from '@ng-bootstrap/ng-bootstrap';
+import { EmployeesModalComponent } from '../employees-modal/employees-modal.component';
 
 @Component({
   selector: 'app-employees',
@@ -16,7 +18,7 @@ import { EmployeesService } from '../employees.service';
 export class EmployeesComponent implements OnInit, OnDestroy{
 
   public employees: Employee[] = [];
-
+  
   columns: (keyof Employee)[];
 
   dtoptions: Config = {}
@@ -25,44 +27,28 @@ export class EmployeesComponent implements OnInit, OnDestroy{
   @ViewChild(DataTableDirective, { static: false })
   dataelement!: DataTableDirective;
 
-  //suscription!: Subscription;
-
-  constructor(private employeesService: EmployeesService) {
+  constructor(private employeesService: EmployeesService, private modalService: NgbModal) {
     this.columns= Object.keys({
       id: '',
       name: '',
       last_name: '',
       email: '',
       position: '',
-      age: 0,
     }) as (keyof Employee)[];    
+
   }
-
+  
+//mediante el servicio despues del onsubmit se podria mandar a llamar un evento conj un subscribe para llamar el rerender
   ngOnInit() {
-    
-    
-    // this.suscription = this.employeesService.refresh$.subscribe(() => {
-    //   this.getAllEmployees();
-    // })
-
     this.dtoptions = {
       paging: true,
       searching: true,
       ordering: true,
       pagingType: 'full',
-      columns: this.columns.map((key) => ({
-        title: key.toString(),
-        data: key.toString()
-      }))
     };
-    
-    // this.dtoptions = {
-    //   pagingType: 'full'
-    // }
   }
 
   ngAfterViewInit(): void {
-    //this.dttrigger.next(null);
     this.getAllEmployees();
   }
 
@@ -77,17 +63,41 @@ export class EmployeesComponent implements OnInit, OnDestroy{
       // Destroy the table first
       dtInstance.destroy();
       // Call the dtTrigger to rerender again
+      console.log("RERENDER: ",this.employees);
+      //this.employees = this.employeesService.employees;
       this.dttrigger.next(this.dtoptions);
     });
   }
 
+  openModal(){
+    const modalRef = this.modalService.open(EmployeesModalComponent, {
+      size: 'l',
+      backdrop: 'static'
+    });
+    modalRef.result.then((result : Employee) => {//esto se ejecuta despues de que el modal se cierra
+      if(result){
+        console.log("Modal Result0: ", this.employees);
+        console.log("Modal Result1: ", result);
+        this.employees.push(result);
+        console.log("Modal Result2: ", this.employees);
+        //this.rerender();
+        //this.getAllEmployees();
+      }
+    });
+  }
+
+  closeModal(){
+    this.modalService.dismissAll();
+  }
+
   getAllEmployees() {
     this.employeesService.getAllEmployees().subscribe(
-      (result: Employee[]) => {
+      (result: any) => {
+        console.log("Hola: ",result);
         this.employees = result; // Asignamos los empleados al arreglo employees
-        console.log(result);
-        //this.columns = Object.keys(this.employees[0]);
-        //this.dttrigger.next(null);
+        console.log("Hola2: ",this.employees);
+        //this.rerender();
+        this.dttrigger.next(this.employees);
       },
       (error) => {
         console.error(error); // Manejo de errores
@@ -111,9 +121,7 @@ export class EmployeesComponent implements OnInit, OnDestroy{
 
   deleteEmployee(employee: Employee) {
     this.employeesService.deleteEmployee(employee);
-    this.employees = this.employees.filter(
-      (employee) => employee.id !== employee.id
-    );
+    this.employees = this.employees.filter(emp => emp.id !== employee.id);
     this.rerender();
   }
 

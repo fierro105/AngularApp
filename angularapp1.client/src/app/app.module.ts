@@ -6,12 +6,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { HomeComponent } from './home/home.component';
-import { AboutComponent } from './about/about.component';
 import { EmployeesComponent } from './employees/employees.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { DataTablesModule } from 'angular-datatables';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EmployeesModalComponent } from './employees-modal/employees-modal.component';
+import { NgbModal, NgbModalConfig} from '@ng-bootstrap/ng-bootstrap';
 
 
 @NgModule({
@@ -19,9 +19,8 @@ import { EmployeesModalComponent } from './employees-modal/employees-modal.compo
     AppComponent,
     NavbarComponent,
     HomeComponent,
-    AboutComponent,
     EmployeesComponent,
-    EmployeesModalComponent,
+    EmployeesModalComponent
   ],
   imports: [
     BrowserModule, HttpClientModule,

@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, ViewChild } from '@angular/core';
 import { FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
 import { Employee } from '../models/employee.model';
-import { EmployeesService } from '../employees.service';
+import { EmployeesService } from '../services/employees.service';
+import { NgbModal, NgbModalConfig, NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import { EmployeesComponent } from '../employees/employees.component';
+
 
 
 @Component({
@@ -15,8 +18,10 @@ import { EmployeesService } from '../employees.service';
 export class EmployeesModalComponent implements OnInit {
 
   checkoutForm: FormGroup;
+  private employeesComponent!: EmployeesComponent;
 
-  constructor(private formBuilder: FormBuilder, private employeesService: EmployeesService) {
+  constructor(private formBuilder: FormBuilder, private employeesService: EmployeesService, private modalService: NgbModal, private modalActive: NgbActiveModal) {
+
     this.checkoutForm = this.formBuilder.group({
       id: ['', [Validators.required]],
       name: ['', [Validators.required]],
@@ -39,6 +44,10 @@ export class EmployeesModalComponent implements OnInit {
   }
 
 
+  closeModal(){
+    this.modalService.dismissAll();
+  }
+
   onSubmit() {
     console.log(this.checkoutForm.value);
         var newEmployee: Employee = {
@@ -49,8 +58,14 @@ export class EmployeesModalComponent implements OnInit {
           name: this.checkoutForm.value.name || "",
           position: this.checkoutForm.value.position || "",
         };
-    
-    this.employeesService.createEmployee(newEmployee);
+
+    this.employeesService.createEmployee(newEmployee).subscribe((response:Employee) => {
+      if(response){
+        console.log("se guardo exitosamente!");
+        this.modalActive.close(newEmployee);
+      }
+    });
+   
   }
 
   getEmployeeById(employee: Employee | null) {
